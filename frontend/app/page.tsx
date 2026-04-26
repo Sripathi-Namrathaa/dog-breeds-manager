@@ -5,8 +5,11 @@ import DogForm from "./components/DogForm";
 import DogItem from "./components/DogItem";
 import type { DogBreed, DogFormData } from "./types";
 
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+
 async function loadDogs(): Promise<DogBreed[]> {
-  const res = await fetch("http://localhost:3001/dogs", {
+  const res = await fetch(`${API_URL}/dogs`, {
     cache: "no-store",
   });
   const data: Record<string, string[]> = await res.json();
@@ -60,7 +63,7 @@ export default function Home() {
 
   const handleAddOrUpdate = async (dog: DogFormData) => {
     if (editingDog) {
-      await fetch(`http://localhost:3001/dogs/${editingDog.id}`, {
+      await fetch(`${API_URL}/dogs/${editingDog.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ subBreeds: dog.subBreeds }),
@@ -71,10 +74,11 @@ export default function Home() {
           d.id === editingDog.id ? { ...d, subBreeds: dog.subBreeds } : d,
         ),
       );
+
       setEditingDog(null);
       scrollToCard(editingDog.id);
     } else {
-      await fetch("http://localhost:3001/dogs", {
+      await fetch(`${API_URL}/dogs`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(dog),
@@ -85,7 +89,7 @@ export default function Home() {
   };
 
   const handleDelete = async (id: string) => {
-    await fetch(`http://localhost:3001/dogs/${id}`, { method: "DELETE" });
+    await fetch(`${API_URL}/dogs/${id}`, { method: "DELETE" });
     refreshDogs();
   };
 
