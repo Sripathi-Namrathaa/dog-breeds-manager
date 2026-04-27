@@ -10,13 +10,22 @@ const PORT = process.env.PORT || 3001;
 const FILE_PATH = "./data/dogs.json";
 
 const readData = () => {
-  if (!fs.existsSync(FILE_PATH)) return {};
-  const data = fs.readFileSync(FILE_PATH);
-  return JSON.parse(data);
+  try {
+    if (!fs.existsSync(FILE_PATH)) return {};
+    const data = fs.readFileSync(FILE_PATH);
+    return JSON.parse(data);
+  } catch (err) {
+    console.error("Error reading data:", err);
+    return {};
+  }
 };
 
 const writeData = (data) => {
-  fs.writeFileSync(FILE_PATH, JSON.stringify(data, null, 2));
+  try {
+    fs.writeFileSync(FILE_PATH, JSON.stringify(data, null, 2));
+  } catch (err) {
+    console.error("Error writing data:", err);
+  }
 };
 
 app.get("/", (req, res) => {

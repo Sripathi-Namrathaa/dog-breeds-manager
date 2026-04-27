@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import type { DogBreed, DogFormData } from "../types";
 
 interface DogFormProps {
@@ -17,15 +17,8 @@ export default function DogForm({
   const [breed, setBreed] = useState("");
   const [subBreeds, setSubBreeds] = useState("");
   const [loading, setLoading] = useState(false);
-  const [lastInitialDataId, setLastInitialDataId] = useState<string | null>(
-    null,
-  );
 
-  const currentId = initialData?.id ?? null;
-
-  if (currentId !== lastInitialDataId) {
-    setLastInitialDataId(currentId);
-
+  useEffect(() => {
     if (initialData) {
       setBreed(initialData.breed || "");
       setSubBreeds((initialData.subBreeds || []).join(", "));
@@ -33,7 +26,7 @@ export default function DogForm({
       setBreed("");
       setSubBreeds("");
     }
-  }
+  }, [initialData]);
 
   const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
@@ -46,12 +39,16 @@ export default function DogForm({
       .map((s) => s.trim())
       .filter(Boolean);
 
-    await onSubmit({
-      breed: breed.trim(),
-      subBreeds: formatted,
-    });
-
-    setLoading(false);
+    try {
+      await onSubmit({
+        breed: breed.trim(),
+        subBreeds: formatted,
+      });
+    } catch (err) {
+      console.error("Submit failed", err);
+    } finally {
+      setLoading(false);
+    }
 
     if (!initialData) {
       setBreed("");

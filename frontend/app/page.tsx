@@ -5,20 +5,22 @@ import DogForm from "./components/DogForm";
 import DogItem from "./components/DogItem";
 import type { DogBreed, DogFormData } from "./types";
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 async function loadDogs(): Promise<DogBreed[]> {
-  const res = await fetch(`${API_URL}/dogs`, {
-    cache: "no-store",
-  });
-  const data: Record<string, string[]> = await res.json();
+  try {
+    const res = await fetch(`${API_URL}/dogs`, { cache: "no-store" });
+    const data: Record<string, string[]> = await res.json();
 
-  return Object.entries(data).map(([breed, subBreeds]) => ({
-    id: breed,
-    breed,
-    subBreeds,
-  }));
+    return Object.entries(data).map(([breed, subBreeds]) => ({
+      id: breed,
+      breed,
+      subBreeds,
+    }));
+  } catch (err) {
+    console.error("Failed to fetch dogs", err);
+    return [];
+  }
 }
 
 export default function Home() {
@@ -56,41 +58,51 @@ export default function Home() {
   const scrollToCard = (breedId: string) => {
     setHighlightedBreed(breedId);
     setTimeout(() => {
-      document.getElementById(`dog-${breedId}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+      document
+        .getElementById(`dog-${breedId}`)
+        ?.scrollIntoView({ behavior: "smooth", block: "center" });
     }, 200);
     setTimeout(() => setHighlightedBreed(null), 2500);
   };
 
   const handleAddOrUpdate = async (dog: DogFormData) => {
-    if (editingDog) {
-      await fetch(`${API_URL}/dogs/${editingDog.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ subBreeds: dog.subBreeds }),
-      });
+    try {
+      if (editingDog) {
+        await fetch(`${API_URL}/dogs/${editingDog.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ subBreeds: dog.subBreeds }),
+        });
 
-      setDogs((prev) =>
-        prev.map((d) =>
-          d.id === editingDog.id ? { ...d, subBreeds: dog.subBreeds } : d,
-        ),
-      );
+        setDogs((prev) =>
+          prev.map((d) =>
+            d.id === editingDog.id ? { ...d, subBreeds: dog.subBreeds } : d,
+          ),
+        );
 
-      setEditingDog(null);
-      scrollToCard(editingDog.id);
-    } else {
-      await fetch(`${API_URL}/dogs`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(dog),
-      });
-      await refreshDogs();
-      scrollToCard(dog.breed);
+        setEditingDog(null);
+        scrollToCard(editingDog.id);
+      } else {
+        await fetch(`${API_URL}/dogs`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(dog),
+        });
+        await refreshDogs();
+        scrollToCard(dog.breed);
+      }
+    } catch (err) {
+      console.error("API error:", err);
     }
   };
 
   const handleDelete = async (id: string) => {
-    await fetch(`${API_URL}/dogs/${id}`, { method: "DELETE" });
-    refreshDogs();
+    try {
+      await fetch(`${API_URL}/dogs/${id}`, { method: "DELETE" });
+      refreshDogs();
+    } catch (err) {
+      console.error("Delete failed:", err);
+    }
   };
 
   return (
@@ -108,17 +120,23 @@ export default function Home() {
           />
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {dogs.map((dog) => (
-            <DogItem
-              key={dog.id}
-              dog={dog}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-              highlighted={dog.id === highlightedBreed}
-            />
-          ))}
-        </div>
+        {dogs.length === 0 ? (
+          <p className="text-center text-gray-500 mt-10">
+            No dog breeds available
+          </p>
+        ) : (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {dogs.map((dog) => (
+              <DogItem
+                key={dog.id}
+                dog={dog}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                highlighted={dog.id === highlightedBreed}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

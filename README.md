@@ -6,8 +6,8 @@ A full-stack web application that allows users to view, create, update, and dele
 
 ## 🚀 Live Demo
 
-- **Frontend (Vercel):** https://your-frontend-url.vercel.app
-- **Backend (Render):** https://your-backend-url.onrender.com
+- **Frontend (Vercel):** https://dog-breeds-manager-pkvq1maj3-sripathi-namrathaas-projects.vercel.app/
+- **Backend (Render):** https://dog-breeds-manager.onrender.com
 
 ---
 
@@ -24,7 +24,7 @@ dog-breeds-manager/
 
 ### 1. Clone the Repository
 
-git clone https://github.com/your-username/dog-breeds-manager.git
+git clone https://github.com/Sripathi-Namrathaa/dog-breeds-manager.git
 cd dog-breeds-manager
 
 ---
@@ -48,6 +48,15 @@ npm run dev
 
 Frontend will run at:
 http://localhost:3000
+
+---
+
+## 🧪 How to Test
+
+1. Add a new breed
+2. Refresh → data persists
+3. Edit sub-breeds
+4. Delete breed
 
 ---
 
